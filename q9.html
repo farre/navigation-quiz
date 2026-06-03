@@ -1,0 +1,13 @@
+<!doctype html>
+Instructions: Check logs.<br>
+<iframe name="frame" src="frame-start.html"></iframe><br>
+<script>
+    const iframe = document.querySelector('iframe');
+    iframe.contentWindow.hello = 'world';
+
+    if (iframe.contentWindow.location.href === 'about:blank') {
+        iframe.addEventListener('load', () => {
+            console.log(iframe.contentWindow.hello);
+        });
+    }
+</script>
