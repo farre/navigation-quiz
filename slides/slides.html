@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session History and Navigation</title>
+<style>
+  :root {
+    --dark: #1e1640;
+    --purple: #4b2a8a;
+    --pink: #ff2e8b;
+    --ink: #2b2150;
+    --text: #2f2a40;
+    --code-green: #2e8b57;
+    --code: #1f2937;
+    --link: #6b4bd6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #0c0a18;
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #deck { position: relative; width: 100vw; height: 100vh; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 4.5vh 5vw;
+    background: #ffffff;
+  }
+  .slide.active { display: flex; }
+
+  /* ---- Dark themed slides (title / section / special) ---- */
+  .slide.dark {
+    background:
+      radial-gradient(120% 90% at 100% 0%, var(--purple) 0%, transparent 55%),
+      linear-gradient(160deg, #1a1338 0%, #221a44 60%, #2c2056 100%);
+    color: #fff;
+  }
+
+  /* ---- Content slide header ---- */
+  .topbar { font-size: 1.05vw; color: #5d5570; margin-bottom: 4vh; }
+  .topbar b { color: var(--ink); font-weight: 700; }
+
+  h1.title {
+    font-size: 5vw;
+    font-weight: 800;
+    color: var(--ink);
+    margin: 0 0 0.4em 0;
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+  }
+  .subtitle { font-size: 1.7vw; color: #4a4360; margin: -0.4em 0 3vh 0; }
+
+  .body { flex: 1 1 auto; min-height: 0; }
+
+  h2.section-head { font-size: 2vw; color: var(--ink); font-weight: 800; margin: 1vh 0 2vh 0; }
+
+  ul, ol { margin: 0; padding: 0 0 0 1.2em; }
+  li { font-size: 1.7vw; line-height: 1.9; color: #36304a; }
+  li ul, li ol { padding-left: 1.4em; }
+  li ul li, li ol li { font-size: 1.45vw; color: #4a4360; }
+  .lead { font-size: 1.6vw; color: #4a4360; margin: 0 0 1.2vh 0; }
+
+  code, .mono { font-family: "SFMono-Regular", Consolas, "Roboto Mono", monospace; }
+  .grn { color: var(--code-green); }
+  .strike { text-decoration: line-through; color: #8a82a6; }
+  em { font-style: italic; }
+  a, .link { color: var(--link); text-decoration: underline; cursor: pointer; }
+
+  pre.code {
+    font-family: "SFMono-Regular", Consolas, "Roboto Mono", monospace;
+    font-size: 1.45vw;
+    line-height: 1.7;
+    color: var(--code);
+    margin: 1vh 0;
+    white-space: pre-wrap;
+  }
+
+  /* three-column layout */
+  .cols { display: flex; gap: 4vw; }
+  .col { flex: 1; }
+  .col h3 { font-size: 1.9vw; color: var(--ink); margin: 0 0 1.5vh 0; }
+  .col.dim { opacity: 0.32; }
+  .col ul li { font-size: 1.4vw; line-height: 1.9; }
+
+  /* ---- Big title slide ---- */
+  .brandrow { display: flex; align-items: center; gap: 1vw; margin-bottom: 6vh; }
+  .ff-logo { width: 4vw; height: 4vw; }
+  .brandrow .word { font-size: 2.6vw; font-weight: 800; }
+  .hero-title { font-size: 8.5vw; font-weight: 800; line-height: 0.98; margin: 0; letter-spacing: -0.015em; }
+  .hero-sub { font-size: 2.4vw; color: var(--pink); margin-top: 2vh; }
+  .hero-meta { margin-top: auto; font-size: 1.4vw; color: #d8d2ee; }
+  .hero-meta b { color: #fff; }
+
+  /* section divider */
+  .section-wrap { flex: 1; display: flex; align-items: center; justify-content: space-between; }
+  .section-name { font-size: 6vw; font-weight: 800; color: #fff; line-height: 1.05; }
+  .section-num { font-size: 14vw; font-weight: 800; color: #fff; line-height: 1; }
+  .section-kick { font-size: 2vw; color: var(--pink); margin-top: 1.5vh; }
+
+  /* TOC */
+  .toc-split { flex: 1; display: flex; }
+  .toc-left {
+    width: 38%;
+    background: radial-gradient(120% 120% at 0% 0%, var(--purple) 0%, transparent 60%), linear-gradient(160deg, #1a1338, #2a1f5c);
+    display: flex; align-items: center; padding: 0 4vw;
+    margin: -4.5vh 0 -4.5vh -5vw;
+  }
+  .toc-left h1 { font-size: 5vw; font-weight: 800; color: #fff; line-height: 1.05; }
+  .toc-right { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-left: 6vw; }
+  .toc-right ol { list-style: none; margin: 0; padding: 0; }
+  .toc-right li { font-size: 2.3vw; color: var(--ink); padding: 1.6vh 0; }
+  .toc-right li b { display: inline-block; width: 2.5em; }
+
+  /* centered special slide */
+  .center-special { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .center-special .kick { font-size: 1.7vw; color: #d8d2ee; margin-bottom: 2vh; }
+  .center-special h1 { font-size: 6vw; font-weight: 800; color: #fff; margin: 0; line-height: 1.05; max-width: 70%; }
+  .center-special .sub { font-size: 2.4vw; color: var(--pink); margin-top: 3vh; }
+
+  .thankyou { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .thankyou h1 { font-size: 9vw; font-weight: 800; color: #fff; margin: 0; }
+
+  .links-slide { display: flex; align-items: center; }
+  .links-slide ul li { font-size: 1.8vw; line-height: 2.2; }
+
+  /* footer */
+  .footer {
+    position: absolute; left: 5vw; right: 5vw; bottom: 3vh;
+    display: flex; align-items: flex-end; justify-content: space-between; pointer-events: none;
+  }
+  .footer .conf, .footer .pg { font-size: 1.1vw; color: #6b6480; }
+  .slide.dark .footer .conf, .slide.dark .footer .pg { color: #cfc7e6; }
+
+  /* xkcd strip */
+  .xkcd-box { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .xkcd-img { max-width: 100%; max-height: 70vh; height: auto; display: block; }
+  .xkcd-box .strip { max-width: 75%; font-family: "Comic Sans MS", "Comic Sans", cursive; text-align: center; }
+  .xkcd-box .strip h4 { margin: 0 0 1.5vh 0; font-size: 1.6vw; }
+  .xkcd-cols { display: flex; gap: 1vw; }
+  .xkcd-cols .panel { border: 2px solid #222; padding: 1.5vh 1vw; flex: 1; font-size: 1.3vw; text-align: left; }
+
+  /* nav hud */
+  #hud {
+    position: fixed; bottom: 1vh; left: 50%; transform: translateX(-50%);
+    font-size: 12px; color: #9a93b0; background: rgba(120,110,160,0.12);
+    padding: 4px 12px; border-radius: 20px; z-index: 50; font-family: monospace;
+  }
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <!-- 1: TITLE -->
+  <section class="slide dark">
+    <div class="brandrow">
+      <svg class="ff-logo" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#ff7139"/><circle cx="52" cy="56" r="30" fill="#7a3fd1"/><circle cx="40" cy="40" r="13" fill="#ffd000"/></svg>
+      <span class="word">Firefox</span>
+    </div>
+    <h1 class="hero-title">Session History<br>and Navigation</h1>
+    <div class="hero-sub">“Welcome to the dragon’s maw”<sup><a href="https://html.spec.whatwg.org/#:~:text=dragon%27s%20maw">[1]</a></sup></div>
+    <div class="hero-meta"><b>2026-06-17</b> &nbsp; Andreas Farre &nbsp;—&nbsp; Codenaut and hydra slayer</div>
+  </section>
+
+  <!-- 2: TOC -->
+  <section class="slide">
+    <div class="toc-split">
+      <div class="toc-left"><h1>Table of contents</h1></div>
+      <div class="toc-right">
+        <ol>
+          <li><b>1.</b>Introduction</li>
+          <li><b>2.</b>Session History and Navigation</li>
+          <li><b>3.</b>Navigation API</li>
+          <li><b>4.</b>Retrospective</li>
+          <li><b>5.</b>Q&amp;A</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3: SECTION 01 -->
+  <section class="slide dark">
+    <div class="section-wrap">
+      <div class="section-name">Introduction</div>
+      <div class="section-num">01</div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Introduction</div>
+    <h1 class="title">Introduction</h1>
+    <div class="body">
+      <h2 class="section-head">After this presentation we’ll all know:</h2>
+      <ul>
+        <li>How navigation works with session history</li>
+        <li>What the Navigation API changes</li>
+        <li>What we learned from implementing a new feature as part of Interop 2025</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Introduction</div>
+    <h1 class="title">Introduction</h1>
+    <div class="body">
+      <h2 class="section-head">Domain Language</h2>
+      <p class="lead">Three categories of navigation</p>
+      <ul>
+        <li>Initiator</li>
+        <li>Navigation type</li>
+        <li>Navigation destination</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Introduction</div>
+    <h1 class="title">Introduction</h1>
+    <div class="body">
+      <h2 class="section-head">Domain Language</h2>
+      <p class="lead">Three categories of navigation</p>
+      <ul>
+        <li>Initiator
+          <ul><li>“browser UI”</li><li>“activation”</li><li>“none”</li></ul>
+        </li>
+        <li>Navigation type</li>
+        <li>Navigation destination</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Introduction</div>
+    <h1 class="title">Introduction</h1>
+    <div class="body">
+      <h2 class="section-head">Domain Language</h2>
+      <p class="lead">Three categories of navigation</p>
+      <ul>
+        <li>Initiator
+          <ul><li>User</li><li>Script</li><li>Other</li></ul>
+        </li>
+        <li>Navigation type</li>
+        <li>Navigation destination</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Introduction</div>
+    <h1 class="title">Introduction</h1>
+    <div class="body">
+      <h2 class="section-head">Domain Language</h2>
+      <p class="lead">Three categories of navigation</p>
+      <ul>
+        <li>Initiator</li>
+        <li>Navigation type
+          <ul><li>“push”</li><li>“replace”</li><li>“reload”</li><li>“traverse”</li></ul>
+        </li>
+        <li>Navigation destination</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Introduction</div>
+    <h1 class="title">Introduction</h1>
+    <div class="body">
+      <h2 class="section-head">Domain Language</h2>
+      <p class="lead">Three categories of navigation</p>
+      <ul>
+        <li>Initiator</li>
+        <li>Navigation type</li>
+        <li>Navigation destination
+          <ul><li>Cross-document</li><li>Same-document</li></ul>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Introduction</div>
+    <h1 class="title">Introduction</h1>
+    <div class="body">
+      <h2 class="section-head">Domain Language</h2>
+      <p class="lead">Three categories of navigation</p>
+      <ul>
+        <li><a class="link">#user-navigation-involvement</a></li>
+        <li><a class="link">#navigationtype</a></li>
+        <li><a class="link">#the-navigationdestination-interface:dom-navigationdestination-samedocument-2</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Introduction</div>
+    <h1 class="title">Introduction</h1>
+    <div class="body">
+      <h2 class="section-head">Domain Language</h2>
+      <p class="lead">Some common gotchas</p>
+      <ul>
+        <li>There’s a difference between Navigation and navigation</li>
+        <li>“a synchronous” sounds like “asynchronous”</li>
+        <li>… and lots of other points of confusion. Stop me if something is unclear!</li>
+      </ul>
+      <p class="lead" style="margin-top:3vh">There will <em>always</em> be a risk of (over-)simplification. Also, I might be wrong!</p>
+    </div>
+  </section>
+
+  <!-- 12: SECTION 02 -->
+  <section class="slide dark">
+    <div class="section-wrap">
+      <div>
+        <div class="section-name">Session History<br>and Navigation</div>
+        <div class="section-kick">Rawr</div>
+      </div>
+      <div class="section-num">02</div>
+    </div>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title">Many Navigation Entry Surfaces</h1>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <h3>User</h3>
+          <ul><li>Address bar</li><li>Back/forward/reload UI</li><li>Link click</li><li>Form submit</li><li>…</li></ul>
+        </div>
+        <div class="col">
+          <h3>Script</h3>
+          <ul><li>The <code class="grn">Location</code> interface</li><li>The <code class="grn">History</code> interface</li><li><code class="grn">window.open</code></li><li><code class="grn">iframe.src</code></li><li>…</li></ul>
+        </div>
+        <div class="col">
+          <h3>Other</h3>
+          <ul><li>Redirects</li><li>Error pages</li><li>…</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title">Three canonical flows</h1>
+    <div class="body">
+      <ul>
+        <li>Cross-document navigation</li>
+        <li>Same-document navigation</li>
+        <li>Traversal</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title">Three <span style="font-size:0.5em;">(plus one)</span> canonical flows</h1>
+    <div class="body">
+      <ul>
+        <li>Cross-document navigation</li>
+        <li>Same-document navigation</li>
+        <li>Traversal</li>
+        <li>… session history mutation</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title">Specification Entry Points</h1>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <h3 class="mono">#navigate</h3>
+          <p class="lead">Entry point for navigations.</p>
+          <ul><li>Address bar</li><li>Link click</li><li>Form submit</li><li><code class="grn">window.open</code></li><li><code class="grn">iframe.src</code></li><li>The <code class="grn">Location</code> interface</li><li>…</li></ul>
+        </div>
+        <div class="col">
+          <h3 class="mono">#apply-the-history-step</h3>
+          <p class="lead">Entry point for history traversals.</p>
+          <ul><li>Back/forward/reload UI</li><li>The <code class="grn">History</code> interface</li><li>The <code class="grn">Location</code> interface</li><li>…</li></ul>
+        </div>
+        <div class="col">
+          <h3 class="mono">#url-and-history-update-steps</h3>
+          <p class="lead">Entry point for session history mutators.</p>
+          <ul><li>The <code class="grn">History</code> interface</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title mono">#navigate</h1>
+    <p class="subtitle">Let’s look at some spec excerpts</p>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <h3>same-document</h3>
+          <p class="lead">14. If all of the following are true:</p>
+          <ul>
+            <li>…</li>
+            <li><em>url</em> <a class="link">equals</a> <em>navigable</em>'s <a class="link">active session history entry</a>'s <a class="link">URL</a> with <em>exclude fragments</em> set to true; and</li>
+            <li><em>url</em>'s <a class="link">fragment</a> is non-null,</li>
+          </ul>
+          <p class="lead">then:</p>
+          <ol>
+            <li><a class="link">Navigate to a fragment</a> given <em>navigable, url, historyHandling, userInvolvement, sourceElement, navigationAPIState,</em> and <em>navigationId</em>.</li>
+            <li>Return.</li>
+          </ol>
+        </div>
+        <div class="col">
+          <h3>cross-document</h3>
+          <p class="lead">23. <a class="link">In parallel</a>, run these steps:</p>
+          <p class="lead">…</p>
+          <p class="lead">23.6. Let <em>historyEntry</em> be a new <a class="link">session history entry</a>, with its <a class="link">URL</a> set to <em>url</em> and its <a class="link">document state</a> set to <em>documentState</em>.</p>
+          <p class="lead">…</p>
+          <p class="lead">23.8.9. <a class="link">Attempt to populate the history entry's document</a> for <em>historyEntry</em> …</p>
+          <p class="lead">23.8.9.1. <a class="link">Append session history traversal steps</a> to <em>navigable</em>'s <a class="link">traversable</a> to <a class="link">finalize a cross-document navigation</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title mono">#navigate-fragid</h1>
+    <p class="subtitle">Let’s look at some spec excerpts</p>
+    <div class="body">
+      <h2 class="section-head">Navigate to a fragment</h2>
+      <p class="lead">17. <a class="link">Append the following session history synchronous navigation steps</a> involving <em>navigable</em> to <em>traversable</em>:</p>
+      <ol>
+        <li><a class="link">Finalize a same-document navigation</a> given <em>traversable, navigable, historyEntry, entryToReplace, historyHandling,</em> and <em>userInvolvement</em>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 19 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title mono">#finalize-a-same-document-navigation</h1>
+    <p class="subtitle">Let’s look at some spec excerpts</p>
+    <div class="body">
+      <h2 class="section-head">Finalize a same-document navigation</h2>
+      <p class="lead">4. Let <em>targetEntries</em> be the result of <a class="link">getting session history entries</a> for <em>targetNavigable</em>.</p>
+      <p class="lead">5. If <em>entryToReplace</em> is null, then:</p>
+      <p class="lead" style="padding-left:2em">…</p>
+      <p class="lead" style="padding-left:2em">5.4. <a class="link">Append</a> <em>targetEntry</em> to <em>targetEntries</em>.</p>
+      <p class="lead" style="padding-left:1em">Otherwise:</p>
+      <p class="lead" style="padding-left:2em">1. <a class="link">Replace</a> <em>entryToReplace</em> with <em>targetEntry</em> in <em>targetEntries</em>.</p>
+      <p class="lead" style="padding-left:2em">2. …</p>
+      <p class="lead">6. <a class="link">Apply the push/replace history step</a> <em>targetStep</em> to <em>traversable</em> given <em>historyHandling</em> and <em>userInvolvement</em>.</p>
+    </div>
+  </section>
+
+  <!-- 20 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title mono">#finalize-a-cross-document-navigation</h1>
+    <p class="subtitle">Let’s look at some spec excerpts</p>
+    <div class="body">
+      <h2 class="section-head">Finalize a cross-document navigation</h2>
+      <p class="lead">8. Let <em>targetEntries</em> be the result of <a class="link">getting session history entries</a> for <em>targetNavigable</em>.</p>
+      <p class="lead">9. If <em>entryToReplace</em> is null, then:</p>
+      <p class="lead" style="padding-left:2em">…</p>
+      <p class="lead" style="padding-left:2em">5.4. <a class="link">Append</a> <em>historyEntry</em> to <em>targetEntries</em>.</p>
+      <p class="lead" style="padding-left:1em">Otherwise:</p>
+      <p class="lead" style="padding-left:2em">1. <a class="link">Replace</a> <em>entryToReplace</em> with <em>historyEntry</em> in <em>targetEntries</em>.</p>
+      <p class="lead" style="padding-left:2em">2. …</p>
+      <p class="lead">6. <a class="link">Apply the push/replace history step</a> <em>targetStep</em> to <em>traversable</em> given <em>historyHandling</em> and <em>userInvolvement</em>.</p>
+    </div>
+  </section>
+
+  <!-- 21 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title mono">#url-and-history-update-steps</h1>
+    <p class="subtitle">Let’s look at some spec excerpts</p>
+    <div class="body">
+      <h2 class="section-head">URL and history update steps</h2>
+      <p class="lead">13. <a class="link">Append the following session history synchronous navigation steps</a> involving <em>navigable</em> to <em>traversable</em>:</p>
+      <p class="lead" style="padding-left:2em">13.1. <a class="link">Finalize a same-document navigation</a> given <em>traversable, navigable, newEntry, entryToReplace, historyHandling,</em> and "<a class="link">none</a>".</p>
+    </div>
+  </section>
+
+  <!-- 22 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title mono">#apply-the-history-step</h1>
+    <p class="subtitle">Let’s look at some spec excerpts</p>
+    <div class="body">
+      <h2 class="section-head">Apply the history step</h2>
+      <p class="lead"><em>*presenter throws up hands in the air and storms out of the room*</em></p>
+    </div>
+  </section>
+
+  <!-- 23 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title mono">#apply-the-history-step</h1>
+    <p class="subtitle">Let’s <b>not</b> look at some spec excerpts</p>
+    <div class="body">
+      <h2 class="section-head">Apply the history step</h2>
+      <p class="lead">Does many things</p>
+      <ul>
+        <li>Handles cancelation checking for <code class="grn">beforeunload</code></li>
+        <li>Handles <code>BFCache</code></li>
+        <li>Handles “<code>traversal</code>”</li>
+        <li>Handles <code class="grn">History.length</code></li>
+        <li><code>#apply-the-history-step</code> is <a class="link">asynchronous</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 24: SECTION 03 -->
+  <section class="slide dark">
+    <div class="section-wrap">
+      <div>
+        <div class="section-name">Navigation API</div>
+        <div class="section-kick">Where everything is same document</div>
+      </div>
+      <div class="section-num">03</div>
+    </div>
+  </section>
+
+  <!-- 25 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title">Why Navigation API</h1>
+    <p class="subtitle">Many Navigation Entry Surfaces</p>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <h3>User</h3>
+          <ul><li>Address bar</li><li>Back/forward/reload UI</li><li>Link click</li><li>Form submit</li><li>…</li></ul>
+        </div>
+        <div class="col">
+          <h3>Script</h3>
+          <ul><li>The <code class="grn">Location</code> interface</li><li>The <code class="grn">History</code> interface</li><li><code class="grn">window.open</code></li><li><code class="grn">iframe.src</code></li><li>…</li></ul>
+        </div>
+        <div class="col">
+          <h3>Events</h3>
+          <ul><li><code class="grn">popstate</code></li><li><code class="grn">hashchange</code></li><li>…</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 26 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Session History and Navigation</div>
+    <h1 class="title">Why Navigation API</h1>
+    <div class="body xkcd-box">
+      <a href="https://xkcd.com/927/" target="_blank" rel="noopener">
+        <img class="xkcd-img" src="https://imgs.xkcd.com/comics/standards.png"
+             alt="xkcd #927: Standards — “Situation: there are 14 competing standards … Soon: there are 15 competing standards.”">
+      </a>
+    </div>
+  </section>
+
+  <!-- 27 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Why Navigation API</h1>
+    <div class="body">
+      <h2 class="section-head">Event for intercepting navigations</h2>
+      <pre class="code">interface NavigateEvent : <span class="link">Event</span> {
+  readonly attribute <span class="link">NavigationType</span> <span class="link">navigationType</span>;
+  // …
+  undefined <span class="link">intercept</span>(optional <span class="link">NavigationInterceptOptions</span> options = {});
+  // …
+};</pre>
+    </div>
+  </section>
+
+  <!-- 28 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Intercepting navigations</h1>
+    <div class="body">
+      <h2 class="section-head">NavigateEvent firing example</h2>
+      <p class="lead">In #navigate-fragid</p>
+      <p class="lead">...</p>
+      <p class="lead">4. Let <em>continue</em> be the result of <a class="link">firing a push/replace/reload <code>navigate</code> event</a> at <em>navigation</em> with <a class="link"><em>navigationType</em></a> set to <em>historyHandling</em>, <a class="link"><em>isSameDocument</em></a> set to true, <a class="link"><em>userInvolvement</em></a> set to <em>userInvolvement</em>, <a class="link"><em>sourceElement</em></a> set to <em>sourceElement</em>, <a class="link"><em>destinationURL</em></a> set to <em>url</em>, and <a class="link"><em>navigationAPIState</em></a> set to <em>destinationNavigationAPIState</em>.</p>
+      <p class="lead">5. If <em>continue</em> is false, then return.</p>
+      <p class="lead">…</p>
+    </div>
+  </section>
+
+  <!-- 29 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Intercepting navigations</h1>
+    <div class="body">
+      <h2 class="section-head">Find all possible kinds of navigations</h2>
+      <p class="lead">Lot’s of places</p>
+      <ul>
+        <li>#navigate</li>
+        <li>#navigate-fragid</li>
+        <li>#shared-history-push/replace-state-steps</li>
+        <li>#reload</li>
+        <li>#checking-if-unloading-is-canceled</li>
+        <li>#apply-the-history-step</li>
+        <li>#downloading-hyperlinks</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 30 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Intercepting navigations</h1>
+    <p class="subtitle">What happens when a navigation goes through</p>
+    <div class="body">
+      <h2 class="section-head mono">#commit-a-navigate-event</h2>
+      <p class="lead">Two cases:</p>
+      <ul>
+        <li>Interception
+          <ul>
+            <li>Stops navigation and immediately commit a session history entry</li>
+            <li>Run intercept handlers</li>
+          </ul>
+        </li>
+        <li>Non-interception
+          <ul><li>Continue navigation and eventually commit a session history entry</li></ul>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 31 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Navigation methods</h1>
+    <div class="body">
+      <h2 class="section-head">Interface Navigation</h2>
+      <pre class="code">interface Navigation : EventTarget {
+  sequence&lt;NavigationHistoryEntry&gt; entries();
+  NavigationResult navigate(USVString url, optional NavigationNavigateOptions options = {});
+  NavigationResult reload(optional NavigationReloadOptions options = {});
+  NavigationResult traverseTo(DOMString key, optional NavigationOptions options = {});
+  NavigationResult back(optional NavigationOptions options = {});
+  NavigationResult forward(optional NavigationOptions options = {});
+  // …
+};</pre>
+    </div>
+  </section>
+
+  <!-- 32 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Navigation methods</h1>
+    <div class="body">
+      <h2 class="section-head">Interface Navigation</h2>
+      <pre class="code">dictionary NavigationResult {
+  Promise&lt;NavigationHistoryEntry&gt; committed;
+  Promise&lt;NavigationHistoryEntry&gt; finished;
+};</pre>
+    </div>
+  </section>
+
+  <!-- 33 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Intercepting navigations</h1>
+    <p class="subtitle">What happens when a navigation goes through</p>
+    <div class="body">
+      <h2 class="section-head mono">#commit-a-navigate-event</h2>
+      <p class="lead">Two cases:</p>
+      <ul>
+        <li>Interception
+          <ul>
+            <li>Stops navigation and immediately commit a session history entry</li>
+            <li>Resolve committed promise</li>
+            <li>Run intercept handlers</li>
+            <li>Eventually resolve finished promise</li>
+          </ul>
+        </li>
+        <li>Non-interception
+          <ul>
+            <li>Continue navigation and eventually commit a session history entry</li>
+            <li>Resolve committed promise</li>
+            <li>Eventually resolve finished promise</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 34 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Navigation events</h1>
+    <div class="body">
+      <h2 class="section-head">How does previous style of navigation integrate</h2>
+      <p class="lead">New events of course.</p>
+      <ul>
+        <li><code>Navigation.onnavigatesuccess</code></li>
+        <li><code>Navigation.onnavigateerror</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 35 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">Navigation event</h1>
+    <div class="body">
+      <h2 class="section-head">How do we detect navigation entry modifation</h2>
+      <p class="lead">New events of course.</p>
+      <ul>
+        <li><code>Navigation.oncurrententrychange</code></li>
+        <li><code>NavigateEvent.ondispose</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 36 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">“Aborting” navigations</h1>
+    <div class="body">
+      <h2 class="section-head">Aborting navigation vs aborting the ongoing navigate event</h2>
+      <p class="lead">Things that stop navigation</p>
+      <ul>
+        <li><code>window.stop()</code></li>
+        <li>Starting a new load</li>
+        <li>Removing an iframe</li>
+        <li>etc</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 37 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">“Aborting” navigations</h1>
+    <div class="body">
+      <h2 class="section-head">Aborting navigation vs aborting the ongoing navigate event</h2>
+      <p class="lead">Things that cancel ongoing navigate event</p>
+      <ul>
+        <li>Reject an navigate commit/intercept/precommit handler (names are hard here)</li>
+        <li>Remove an iframe</li>
+        <li>Call <code>window.stop()</code></li>
+        <li>Firing new navigate events, because navigation can start from other event handlers <em>including from the currently dispatching navigate event</em></li>
+        <li>etc</li>
+        <li>Canceling the <code>onnavigate</code> is not the same as stopping the ongoing navigate event</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 38 -->
+  <section class="slide">
+    <div class="topbar"><b>Session History and Navigation</b> — Navigation API</div>
+    <h1 class="title">“Aborting” navigations</h1>
+    <div class="body">
+      <h2 class="section-head">Aborting navigation vs aborting the ongoing navigate event</h2>
+      <p class="lead">This is handled through #abort-the-ongoing-navigation but is called from everywhere.</p>
+      <ul>
+        <li>#inner-navigate-event-firing-algorithm</li>
+        <li>#performing-a-navigation-api-traversal</li>
+        <li>#inform-the-navigation-api-about-aborting-navigation</li>
+        <li>#inform-the-navigation-api-about-child-navigable-destruction</li>
+        <li>#downloading-hyperlinks</li>
+        <li>#set-the-ongoing-navigation</li>
+        <li>… and #set-the-ongoing-navigation is probably the most problematic one</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 39: SECTION 04 -->
+  <section class="slide dark">
+    <div class="section-wrap">
+      <div>
+        <div class="section-name">Retrospective</div>
+        <div class="section-kick">What we’ve learned</div>
+      </div>
+      <div class="section-num">04</div>
+    </div>
+  </section>
+
+  <!-- 40: SECTION 05 -->
+  <section class="slide dark">
+    <div class="section-wrap">
+      <div>
+        <div class="section-name">Questions</div>
+        <div class="section-kick">And Answers</div>
+      </div>
+      <div class="section-num">05</div>
+    </div>
+  </section>
+
+  <!-- 41: Thank you -->
+  <section class="slide dark">
+    <div class="thankyou"><h1>Thank you!</h1></div>
+  </section>
+
+  <!-- 42: Links -->
+  <section class="slide">
+    <div class="body links-slide">
+      <ul>
+        <li><a class="link" href="https://github.com/farre/navigation-quiz/">https://github.com/farre/navigation-quiz/</a></li>
+        <li><a class="link" href="https://farre.github.io/navigation-examples/">https://farre.github.io/navigation-examples/</a></li>
+        <li><a class="link" href="https://farre.github.io/web-tools/jaketest/">https://farre.github.io/web-tools/jaketest/</a></li>
+        <li><a class="link" href="https://farre.github.io/web-tools/rejake/">https://farre.github.io/web-tools/rejake/</a></li>
+        <li><a class="link" href="https://github.com/farre/t-shirts/tree/main/navigation-and-session-history">https://github.com/farre/t-shirts/tree/main/navigation-and-session-history</a></li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<div id="hud">← / → &nbsp;·&nbsp; <span id="counter">1 / 63</span></div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  const counter = document.getElementById('counter');
+  let idx = 0;
+
+  // Add footer + page number to content slides
+  slides.forEach((s, i) => {
+    const isDark = s.classList.contains('dark');
+    let footer = s.querySelector('.footer');
+    if (!isDark) {
+      if (!footer) {
+        footer = document.createElement('div');
+        footer.className = 'footer';
+        footer.innerHTML = '<span class="conf"></span>';
+        s.appendChild(footer);
+      }
+      const pg = document.createElement('span');
+      pg.className = 'pg';
+      pg.textContent = (i + 1);
+      footer.appendChild(pg);
+    }
+  });
+
+  function show(n) {
+    idx = Math.max(0, Math.min(total - 1, n));
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    counter.textContent = (idx + 1) + ' / ' + total;
+    history.replaceState(null, '', '#' + (idx + 1));
+  }
+  const next = () => show(idx + 1);
+  const prev = () => show(idx - 1);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { next(); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { prev(); e.preventDefault(); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(total - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('a[href]')) return;
+    if (e.clientX < window.innerWidth * 0.25) prev(); else next();
+  });
+
+  const start = parseInt(location.hash.replace('#', ''), 10);
+  show(Number.isInteger(start) && start >= 1 ? start - 1 : 0);
+</script>
+</body>
+</html>
