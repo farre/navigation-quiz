@@ -1,0 +1,9 @@
+<!doctype html>
+<!--https://bugzilla.mozilla.org/show_bug.cgi?id=2037346-->
+Instructions: Click the link, then click either button.<br>
+<iframe name="frame"></iframe><br>
+<a href="one.html" target="frame">/one</a><br>
+<button onclick="location.reload()">location.reload()</a><br>
+<!--Note: The forceGet param to bypass cache is only supported in Firefox-->
+<button onclick="location.reload(true)">location.reload(true)</a>
+<!--When hard reloading via browser UI, soft reloads break and AdoptBFCacheEntry failures appear-->
