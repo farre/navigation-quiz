@@ -1,0 +1,7 @@
+<!doctype html>
+Instructions: Click each link in order, then click the replace button, then the reload button, then back, then reload again.<br>
+<iframe name="frame" src="frame-start.html"></iframe><br>
+<button onclick="frames[0].location.hash='#hash1'">frame #hash1</button><br>
+<button onclick="frames[0].location.hash='#hash2'">frame #hash2</button><br>
+<button onclick="history.replaceState(null, null, '#newhash')">#newhash</button><br>
+<button onclick="location.reload()">reload</button><br>
