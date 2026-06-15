@@ -1,0 +1,16 @@
+<!doctype html>
+Instructions: Click #a, then click either button.<br>
+<a href="#a">#a</a><br>
+<button onclick="goBack()">navigation.back(); location.hash = "forward"</button><br>
+<button onclick="goBackHistory()">history.back(); location.hash = "forward"</button><br>
+<script>
+    function goBack() {
+        navigation.back();
+        location.hash = "forward";
+    }
+    
+    function goBackHistory() {
+        history.back();
+        location.hash = "forward";
+    }
+</script>
