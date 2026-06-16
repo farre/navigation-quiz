@@ -16,34 +16,36 @@ top
 Instructions: Click run, then click back<br>
 <button onclick="run()">run</button><br>
 <script>
+  function log(str) {
+    out.innerText += `${str}\n`
+  }
   function run() {
-    const log = document.querySelector('#out');
     navigation.onnavigate = e => {
       e.intercept({
         async handler() {
-          console.log(`intercepted ${e.destination.url}`);
+          log(`intercepted ${e.destination.url}`);
         }
       })
     };
     navigation.onnavigatesuccess = () => {
-      console.log("success");
+      log("success");
     };
     navigation.onnavigateerrir = () => {
-      console.log("error");
+      log("error");
     };
 
     const {committed, finished} = navigation.navigate("document");
 
     committed.then(() => {
-      console.log("committed");
+      log("committed");
     });
 
     finished.then(() => {
-      console.log("finished");
+      log("finished");
     });
   }
  </script>
-<ouput id="out"></ouput>
+<div id="out"></div>
     
 <link rel="stylesheet" href="source.css">
 <details class="src" open>
