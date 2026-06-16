@@ -10,3 +10,17 @@ Instructions: Click the links in order, then click "traverse to first" to jump t
         frame.navigation.back();
     }
 </script>
+<link rel="stylesheet" href="source.css">
+<details class="src">
+  <summary>source</summary>
+  <div class="lbl">HTML</div>
+  <pre><code>&lt;<span class="tag">iframe</span> <span class="att">name</span>=<span class="str">&quot;frame&quot;</span> <span class="att">src</span>=<span class="str">&quot;frame-start.html&quot;</span>&gt;&lt;/<span class="tag">iframe</span>&gt;&lt;<span class="tag">br</span>&gt;
+&lt;<span class="tag">a</span> <span class="att">href</span>=<span class="str">&quot;one.html&quot;</span> <span class="att">target</span>=<span class="str">&quot;frame&quot;</span>&gt;/one&lt;/<span class="tag">a</span>&gt;&lt;<span class="tag">br</span>&gt;
+&lt;<span class="tag">a</span> <span class="att">href</span>=<span class="str">&quot;#hash&quot;</span>&gt;#hash&lt;/<span class="tag">a</span>&gt;&lt;<span class="tag">br</span>&gt;
+&lt;<span class="tag">button</span> <span class="att">onclick</span>=<span class="str">&quot;goBack()&quot;</span>&gt;go back in iframe&lt;/<span class="tag">button</span>&gt;&lt;<span class="tag">br</span>&gt;</code></pre>
+  <div class="lbl">JavaScript</div>
+  <pre><code><span class="kw">function</span> <span class="fn">goBack</span>() {
+    <span class="kw">const</span> frame = frames[<span class="num">0</span>];
+    frame.navigation.<span class="fn">back</span>();
+}</code></pre>
+</details>

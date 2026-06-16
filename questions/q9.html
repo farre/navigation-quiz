@@ -11,3 +11,18 @@ Instructions: Check logs.<br>
         });
     }
 </script>
+<link rel="stylesheet" href="source.css">
+<details class="src">
+  <summary>source</summary>
+  <div class="lbl">HTML</div>
+  <pre><code>&lt;<span class="tag">iframe</span> <span class="att">name</span>=<span class="str">&quot;frame&quot;</span> <span class="att">src</span>=<span class="str">&quot;frame-start.html&quot;</span>&gt;&lt;/<span class="tag">iframe</span>&gt;&lt;<span class="tag">br</span>&gt;</code></pre>
+  <div class="lbl">JavaScript</div>
+  <pre><code><span class="kw">const</span> iframe = document.<span class="fn">querySelector</span>(<span class="str">&#x27;iframe&#x27;</span>);
+iframe.contentWindow.hello = <span class="str">&#x27;world&#x27;</span>;
+
+<span class="kw">if</span> (iframe.contentWindow.location.href === <span class="str">&#x27;about:blank&#x27;</span>) {
+    iframe.<span class="fn">addEventListener</span>(<span class="str">&#x27;load&#x27;</span>, () =&gt; {
+        console.<span class="fn">log</span>(iframe.contentWindow.hello);
+    });
+}</code></pre>
+</details>

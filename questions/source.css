@@ -1,0 +1,11 @@
+details.src { margin-top: 1em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+details.src summary { cursor: pointer; font-family: system-ui, sans-serif; color: #57606a; }
+details.src pre { margin: .5em 0 0; padding: 12px 14px; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; overflow: auto; line-height: 1.45; }
+details.src .kw  { color: #cf222e; }
+details.src .str { color: #0a3069; }
+details.src .fn  { color: #8250df; }
+details.src .com { color: #6e7781; }
+details.src .num { color: #0550ae; }
+details.src .tag { color: #116329; }
+details.src .att { color: #0550ae; }
+details.src .lbl { font-family: system-ui, sans-serif; font-size: 12px; color: #57606a; margin: .9em 0 0; }

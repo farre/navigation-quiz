@@ -5,5 +5,17 @@ Instructions: Click the link, then click either button.<br>
 <a href="one.html" target="frame">/one</a><br>
 <button onclick="location.reload()">location.reload()</a><br>
 <!--Note: The forceGet param to bypass cache is only supported in Firefox-->
-<button onclick="location.reload(true)">location.reload(true)</a>
+<button onclick="location.reload(true)">location.reload(true)</button>
 <!--When hard reloading via browser UI, soft reloads break and AdoptBFCacheEntry failures appear-->
+<link rel="stylesheet" href="source.css">
+<details class="src">
+  <summary>source</summary>
+  <div class="lbl">HTML</div>
+  <pre><code>&lt;<span class="tag">iframe</span> <span class="att">name</span>=<span class="str">&quot;frame&quot;</span>&gt;&lt;/<span class="tag">iframe</span>&gt;&lt;<span class="tag">br</span>&gt;
+&lt;<span class="tag">a</span> <span class="att">href</span>=<span class="str">&quot;one.html&quot;</span> <span class="att">target</span>=<span class="str">&quot;frame&quot;</span>&gt;/one&lt;/<span class="tag">a</span>&gt;&lt;<span class="tag">br</span>&gt;
+&lt;<span class="tag">button</span> <span class="att">onclick</span>=<span class="str">&quot;location.reload()&quot;</span>&gt;location.reload()&lt;/<span class="tag">a</span>&gt;&lt;<span class="tag">br</span>&gt;
+&lt;<span class="tag">button</span> <span class="att">onclick</span>=<span class="str">&quot;location.reload(true)&quot;</span>&gt;location.reload(true)&lt;/<span class="tag">button</span>&gt;</code></pre>
+  <div class="lbl">JavaScript</div>
+  <pre><code>location.<span class="fn">reload</span>()
+location.<span class="fn">reload</span>(<span class="kw">true</span>)</code></pre>
+</details>
