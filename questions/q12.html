@@ -1,4 +1,16 @@
 <!doctype html>
+<link rel="stylesheet" href="https://resources.whatwg.org/spec.css">
+<link rel="stylesheet" href="https://resources.whatwg.org/standard.css">
+<link rel="stylesheet" href="https://resources.whatwg.org/standard-shared-with-dev.css">
+
+<link rel="stylesheet" href="https://domenic.github.io/jake-diagram-generator/css/jake-diagrams.css">
+<link rel="stylesheet" href="https://domenic.github.io/jake-diagram-generator/css/generator.css">
+<script type="module" src="https://domenic.github.io/jake-diagram-generator/js/generator.mjs"></script>
+
+<textarea>
+
+</textarea>
+
 <!--https://bugzilla.mozilla.org/show_bug.cgi?id=2037346-->
 Instructions: Click the link, then click either button.<br>
 <iframe name="frame"></iframe><br>
@@ -7,8 +19,10 @@ Instructions: Click the link, then click either button.<br>
 <!--Note: The forceGet param to bypass cache is only supported in Firefox-->
 <button onclick="location.reload(true)">location.reload(true)</button>
 <!--When hard reloading via browser UI, soft reloads break and AdoptBFCacheEntry failures appear-->
+
+    
 <link rel="stylesheet" href="source.css">
-<details class="src">
+<details class="src" open>
   <summary>source</summary>
   <div class="lbl">HTML</div>
   <pre><code>&lt;<span class="tag">iframe</span> <span class="att">name</span>=<span class="str">&quot;frame&quot;</span>&gt;&lt;/<span class="tag">iframe</span>&gt;&lt;<span class="tag">br</span>&gt;
@@ -18,4 +32,10 @@ Instructions: Click the link, then click either button.<br>
   <div class="lbl">JavaScript</div>
   <pre><code>location.<span class="fn">reload</span>()
 location.<span class="fn">reload</span>(<span class="kw">true</span>)</code></pre>
+  <details class="src"><summary></summary><output id="preview"></output></details>
+  <div style="display:none">
+    <output id="code"></output>
+    <button id="permalink">Get permalink</button>
+    <input type="checkbox" checked id="html-spec-mode">
+  </div>
 </details>

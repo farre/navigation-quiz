@@ -1,15 +1,40 @@
 <!doctype html>
+<link rel="stylesheet" href="https://resources.whatwg.org/spec.css">
+<link rel="stylesheet" href="https://resources.whatwg.org/standard.css">
+<link rel="stylesheet" href="https://resources.whatwg.org/standard-shared-with-dev.css">
+
+<link rel="stylesheet" href="https://domenic.github.io/jake-diagram-generator/css/jake-diagrams.css">
+<link rel="stylesheet" href="https://domenic.github.io/jake-diagram-generator/css/generator.css">
+<script type="module" src="https://domenic.github.io/jake-diagram-generator/js/generator.mjs"></script>
+
+<textarea>
+!current = 2
+top
+  0: /q1 | doc1
+  1-3: /q1#hash | doc1
+frames[0]
+  0-1: /frame-start
+  2: /one
+  3: /two
+</textarea>
+
 Instructions: Click each link in order, then click back button.<br>
 <iframe name="frame" src="frame-start.html"></iframe><br>
 <a href="#hash">#hash</a><br>
 <a href="one.html" target="frame">/one</a><br>
 <a href="two.html" target="frame">/two</a>
 <link rel="stylesheet" href="source.css">
-<details class="src">
+<details class="src" open>
   <summary>source</summary>
   <div class="lbl">HTML</div>
   <pre><code>&lt;<span class="tag">iframe</span> <span class="att">name</span>=<span class="str">&quot;frame&quot;</span> <span class="att">src</span>=<span class="str">&quot;frame-start.html&quot;</span>&gt;&lt;/<span class="tag">iframe</span>&gt;&lt;<span class="tag">br</span>&gt;
 &lt;<span class="tag">a</span> <span class="att">href</span>=<span class="str">&quot;#hash&quot;</span>&gt;#hash&lt;/<span class="tag">a</span>&gt;&lt;<span class="tag">br</span>&gt;
 &lt;<span class="tag">a</span> <span class="att">href</span>=<span class="str">&quot;one.html&quot;</span> <span class="att">target</span>=<span class="str">&quot;frame&quot;</span>&gt;/one&lt;/<span class="tag">a</span>&gt;&lt;<span class="tag">br</span>&gt;
 &lt;<span class="tag">a</span> <span class="att">href</span>=<span class="str">&quot;two.html&quot;</span> <span class="att">target</span>=<span class="str">&quot;frame&quot;</span>&gt;/two&lt;/<span class="tag">a</span>&gt;</code></pre>
+  <details class="src"><summary></summary><output id="preview"></output></details>
+  <div style="display:none">
+    <output id="code"></output>
+    <button id="permalink">Get permalink</button>
+    <input type="checkbox" checked id="html-spec-mode">
+  </div>
 </details>

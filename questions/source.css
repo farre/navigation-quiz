@@ -9,3 +9,4 @@ details.src .num { color: #0550ae; }
 details.src .tag { color: #116329; }
 details.src .att { color: #0550ae; }
 details.src .lbl { font-family: system-ui, sans-serif; font-size: 12px; color: #57606a; margin: .9em 0 0; }
+textarea { display: none; }

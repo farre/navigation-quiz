@@ -9,7 +9,7 @@ Instructions: Not actually the same document<br>
 <a href="two.html" target="frame2">/two</a><br>
 <a href="leave.html">leave</a><br>
 <link rel="stylesheet" href="source.css">
-<details class="src">
+<details class="src" open>
   <summary>source</summary>
   <div class="lbl">HTML</div>
   <pre><code>&lt;<span class="tag">iframe</span> <span class="att">name</span>=<span class="str">&quot;frame2&quot;</span> <span class="att">src</span>=<span class="str">&quot;frame-start.html&quot;</span>&gt;&lt;/<span class="tag">iframe</span>&gt;
@@ -19,4 +19,10 @@ Instructions: Not actually the same document<br>
 &lt;<span class="tag">a</span> <span class="att">href</span>=<span class="str">&quot;leave.html&quot;</span>&gt;leave&lt;/<span class="tag">a</span>&gt;&lt;<span class="tag">br</span>&gt;</code></pre>
   <div class="lbl">JavaScript</div>
   <pre><code>cookieStore.<span class="fn">delete</span>(<span class="str">&quot;q4.html&quot;</span>)</code></pre>
+  <details class="src"><summary></summary><output id="preview"></output></details>
+  <div style="display:none">
+    <output id="code"></output>
+    <button id="permalink">Get permalink</button>
+    <input type="checkbox" checked id="html-spec-mode">
+  </div>
 </details>

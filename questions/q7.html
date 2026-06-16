@@ -1,4 +1,15 @@
 <!doctype html>
+<link rel="stylesheet" href="https://resources.whatwg.org/spec.css">
+<link rel="stylesheet" href="https://resources.whatwg.org/standard.css">
+<link rel="stylesheet" href="https://resources.whatwg.org/standard-shared-with-dev.css">
+
+<link rel="stylesheet" href="https://domenic.github.io/jake-diagram-generator/css/jake-diagrams.css">
+<link rel="stylesheet" href="https://domenic.github.io/jake-diagram-generator/css/generator.css">
+<script type="module" src="https://domenic.github.io/jake-diagram-generator/js/generator.mjs"></script>
+
+<textarea>
+
+</textarea>
 Instructions: Click each link in order, then click the button, then click back.<br>
 <iframe name="frame" src="frame-start.html"></iframe><br>
 <a href="#hash">hash</a><br>
@@ -6,7 +17,7 @@ Instructions: Click each link in order, then click the button, then click back.<
 <a href="two.html" target="frame">/two</a><br>
 <button onclick="document.querySelector('iframe').remove()">remove</button>
 <link rel="stylesheet" href="source.css">
-<details class="src">
+<details class="src" open>
   <summary>source</summary>
   <div class="lbl">HTML</div>
   <pre><code>&lt;<span class="tag">iframe</span> <span class="att">name</span>=<span class="str">&quot;frame&quot;</span> <span class="att">src</span>=<span class="str">&quot;frame-start.html&quot;</span>&gt;&lt;/<span class="tag">iframe</span>&gt;&lt;<span class="tag">br</span>&gt;
@@ -16,4 +27,10 @@ Instructions: Click each link in order, then click the button, then click back.<
 &lt;<span class="tag">button</span> <span class="att">onclick</span>=<span class="str">&quot;document.querySelector(&#x27;iframe&#x27;).remove()&quot;</span>&gt;remove&lt;/<span class="tag">button</span>&gt;</code></pre>
   <div class="lbl">JavaScript</div>
   <pre><code>document.<span class="fn">querySelector</span>(<span class="str">&#x27;iframe&#x27;</span>).<span class="fn">remove</span>()</code></pre>
+  <details class="src"><summary></summary><output id="preview"></output></details>
+  <div style="display:none">
+    <output id="code"></output>
+    <button id="permalink">Get permalink</button>
+    <input type="checkbox" checked id="html-spec-mode">
+  </div>
 </details>

@@ -67,7 +67,7 @@ def hl_html(markup):
 
 def strip_injected(text):
     text = re.sub(r'\n?<link rel="stylesheet" href="source\.css">', "", text)
-    text = re.sub(r'<details class="src">.*?</details>\n?', "", text, flags=re.S)
+    text = re.sub(r'<details class="src".*\n?', "", text, flags=re.S)
     return text
 
 
@@ -94,6 +94,7 @@ def extract_markup(text):
     markup = re.sub(r"<script\b[^>]*>.*?</script>", "", text, flags=re.S | re.I)
     markup = re.sub(r"<!--.*?-->", "", markup, flags=re.S)
     lines = []
+    isarea = False
     for line in markup.splitlines():
         s = line.strip()
         if not s:
@@ -102,6 +103,16 @@ def extract_markup(text):
             continue
         if s.startswith("Instructions:"):
             continue
+        if s.startswith("<textarea>"):
+            isarea = True
+            continue
+        if s.startswith("</textarea>"):
+            isarea = False
+            continue
+        if isarea:
+            continue
+        if s.startswith("<link"):
+            continue
         lines.append(s)
     return "\n".join(lines)
 
@@ -109,7 +120,7 @@ def extract_markup(text):
 def build_block(markup, js):
     parts = [
         '<link rel="stylesheet" href="source.css">',
-        '<details class="src">',
+        '<details class="src" open>',
         "  <summary>source</summary>",
         '  <div class="lbl">HTML</div>',
         "  <pre><code>%s</code></pre>" % hl_html(markup),
@@ -117,6 +128,12 @@ def build_block(markup, js):
     if js:
         parts.append('  <div class="lbl">JavaScript</div>')
         parts.append("  <pre><code>%s</code></pre>" % hl_js(js))
+    parts.append('  <details class="src"><summary></summary><output id="preview"></output></details>')
+    parts.append('  <div style="display:none">')
+    parts.append('    <output id="code"></output>')
+    parts.append('    <button id="permalink">Get permalink</button>')
+    parts.append('    <input type="checkbox" checked id="html-spec-mode">')
+    parts.append('  </div>')
     parts.append("</details>")
     return "\n".join(parts)
 

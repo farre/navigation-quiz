@@ -1,11 +1,24 @@
 <!doctype html>
+<link rel="stylesheet" href="https://resources.whatwg.org/spec.css">
+<link rel="stylesheet" href="https://resources.whatwg.org/standard.css">
+<link rel="stylesheet" href="https://resources.whatwg.org/standard-shared-with-dev.css">
+
+<link rel="stylesheet" href="https://domenic.github.io/jake-diagram-generator/css/jake-diagrams.css">
+<link rel="stylesheet" href="https://domenic.github.io/jake-diagram-generator/css/generator.css">
+<script type="module" src="https://domenic.github.io/jake-diagram-generator/js/generator.mjs"></script>
+
+<textarea>
+
+</textarea>
 Instructions: Click each link in order, then click the replace button, then the reload button, then back, then reload again.<br>
 <iframe name="frame" src="frame-start.html"></iframe><br>
 <a href="#hash">hash</a><br>
 <button onclick="frames[0].history.replaceState({}, null, 'one.html')">Replace</button><br>
 <button onclick="frames[0].location.reload()">Reload</button>
+
+    
 <link rel="stylesheet" href="source.css">
-<details class="src">
+<details class="src" open>
   <summary>source</summary>
   <div class="lbl">HTML</div>
   <pre><code>&lt;<span class="tag">iframe</span> <span class="att">name</span>=<span class="str">&quot;frame&quot;</span> <span class="att">src</span>=<span class="str">&quot;frame-start.html&quot;</span>&gt;&lt;/<span class="tag">iframe</span>&gt;&lt;<span class="tag">br</span>&gt;
@@ -15,4 +28,10 @@ Instructions: Click each link in order, then click the replace button, then the 
   <div class="lbl">JavaScript</div>
   <pre><code>frames[<span class="num">0</span>].history.<span class="fn">replaceState</span>({}, <span class="kw">null</span>, <span class="str">&#x27;one.html&#x27;</span>)
 frames[<span class="num">0</span>].location.<span class="fn">reload</span>()</code></pre>
+  <details class="src"><summary></summary><output id="preview"></output></details>
+  <div style="display:none">
+    <output id="code"></output>
+    <button id="permalink">Get permalink</button>
+    <input type="checkbox" checked id="html-spec-mode">
+  </div>
 </details>
