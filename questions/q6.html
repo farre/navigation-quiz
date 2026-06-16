@@ -8,9 +8,15 @@
 <script type="module" src="https://domenic.github.io/jake-diagram-generator/js/generator.mjs"></script>
 
 <textarea>
-
+!current = 0
+top
+  0: /q6 | doc1
+  1-2: /q6#hash | doc1
+frames[0]
+  0-1: /frame-start
+  2: /one
 </textarea>
-Instructions: Click each link in order, then long press back button and go back two steps.<br>
+Instructions: Click each link in order, then long press back button and go back two steps (or click button).<br>
 <iframe name="frame" src="frame-start.html"></iframe><br>
 <a href="#hash">hash</a><br>
 <a href="one.html" target="frame">/one</a><br>
