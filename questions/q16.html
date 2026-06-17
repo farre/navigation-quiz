@@ -52,32 +52,34 @@ Instructions: Click run, then click back<br>
   <summary>source</summary>
   <div class="lbl">HTML</div>
   <pre><code>&lt;<span class="tag">button</span> <span class="att">onclick</span>=<span class="str">&quot;run()&quot;</span>&gt;run&lt;/<span class="tag">button</span>&gt;&lt;<span class="tag">br</span>&gt;
-&lt;<span class="tag">ouput</span> <span class="att">id</span>=<span class="str">&quot;out&quot;</span>&gt;&lt;/<span class="tag">ouput</span>&gt;</code></pre>
+&lt;<span class="tag">div</span> <span class="att">id</span>=<span class="str">&quot;out&quot;</span>&gt;&lt;/<span class="tag">div</span>&gt;</code></pre>
   <div class="lbl">JavaScript</div>
-  <pre><code><span class="kw">function</span> <span class="fn">run</span>() {
-  <span class="kw">const</span> log = document.<span class="fn">querySelector</span>(<span class="str">&#x27;#out&#x27;</span>);
+  <pre><code><span class="kw">function</span> <span class="fn">log</span>(str) {
+  out.innerText += `${str}\n`
+}
+<span class="kw">function</span> <span class="fn">run</span>() {
   navigation.onnavigate = e =&gt; {
     e.<span class="fn">intercept</span>({
       async <span class="fn">handler</span>() {
-        console.<span class="fn">log</span>(`intercepted ${e.destination.url}`);
+        <span class="fn">log</span>(`intercepted ${e.destination.url}`);
       }
     })
   };
   navigation.onnavigatesuccess = () =&gt; {
-    console.<span class="fn">log</span>(<span class="str">&quot;success&quot;</span>);
+    <span class="fn">log</span>(<span class="str">&quot;success&quot;</span>);
   };
   navigation.onnavigateerrir = () =&gt; {
-    console.<span class="fn">log</span>(<span class="str">&quot;error&quot;</span>);
+    <span class="fn">log</span>(<span class="str">&quot;error&quot;</span>);
   };
 
   <span class="kw">const</span> {committed, finished} = navigation.<span class="fn">navigate</span>(<span class="str">&quot;document&quot;</span>);
 
   committed.<span class="fn">then</span>(() =&gt; {
-    console.<span class="fn">log</span>(<span class="str">&quot;committed&quot;</span>);
+    <span class="fn">log</span>(<span class="str">&quot;committed&quot;</span>);
   });
 
   finished.<span class="fn">then</span>(() =&gt; {
-    console.<span class="fn">log</span>(<span class="str">&quot;finished&quot;</span>);
+    <span class="fn">log</span>(<span class="str">&quot;finished&quot;</span>);
   });
 }</code></pre>
   <details class="src"><summary></summary><output id="preview"></output></details>
